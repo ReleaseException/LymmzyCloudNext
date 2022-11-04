@@ -22,6 +22,7 @@ public class Config {
                 configuration.put("cloudport", 2000);
                 configuration.put("httpport", 2304);
                 configuration.put("cloudpassword","SeZ59Y6tcfRd7");
+                configuration.put("proxypassword", "mAMi7C6%QD#rCq%ueJ841@Fw^x");
                 configuration.put("templateLocation","global");
                 configuration.put("cacheLocation","jars");
                 try {

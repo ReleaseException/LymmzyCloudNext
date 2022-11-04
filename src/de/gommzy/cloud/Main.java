@@ -1,5 +1,6 @@
 package de.gommzy.cloud;
 
+import com.releasenetworks.bridge.socket.Channel;
 import com.releasenetworks.executor.CloudExecutor;
 import de.gommzy.cloud.wrapper.socket.Client;
 import de.gommzy.cloud.cloud.minecraft.Minecraft;
@@ -43,6 +44,7 @@ public class Main {
                 exception.printStackTrace();
             }
             server.start();
+            new Channel().start();
             Minecraft.startMinecraft();
         }
     }

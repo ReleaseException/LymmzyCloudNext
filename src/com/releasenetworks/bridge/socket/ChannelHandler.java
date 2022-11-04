@@ -1,4 +1,4 @@
-package de.gommzy.cloud.cloud.socket;
+package com.releasenetworks.bridge.socket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,25 +7,26 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-public class ClientHandler {
+public class ChannelHandler {
+
     private PrintWriter writer;
     private BufferedReader reader;
     private String address;
     private Socket socket;
     private Thread clientReciverThread;
 
-    public ClientHandler(Socket socket) {
+    public ChannelHandler(Socket socket) {
         try {
             this.address = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
             this.socket = socket;
 
-            final ClientHandler thisInstance = this;
-            this.clientReciverThread = new Thread(() -> new ClientReciver(thisInstance, socket));
+            final ChannelHandler thisInstance = this;
+            this.clientReciverThread = new Thread(() -> Channel.set(thisInstance, socket));
             clientReciverThread.start();
 
-            System.out.println("[Connection] " + address);
+            System.out.println("[Connection Bridge] " + address);
         } catch (final IOException exception) {
             exception.printStackTrace();
         }
@@ -60,4 +61,5 @@ public class ClientHandler {
     public String getAddress() {
         return address;
     }
+
 }

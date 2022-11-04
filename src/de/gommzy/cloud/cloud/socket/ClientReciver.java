@@ -20,37 +20,32 @@ public class ClientReciver {
                 new Thread(() -> {
                     final String[] args = read.split(" ");
                     switch (args[0]) {
-                        case "login": {
+                        case "login" -> {
                             final String pswd = args[1];
-                            if (!pswd.equals(Config.getString("cloudpassword"))) {
-                                System.out.println("[Wrong-Pswd] "+clientHandler.getAddress());
+                            System.out.println(Config.getOptionAsString("cloudpassword").equals(pswd));
+                            if (!pswd.equals(Config.getOptionAsString("cloudpassword"))) {
+                                System.out.println("[Wrong-Pswd] " + clientHandler.getAddress());
                                 clientHandler.unregister();
                             } else {
-                                System.out.println("[Register] "+clientHandler.getAddress());
+                                System.out.println("[Register] " + clientHandler.getAddress());
                             }
-                            break;
                         }
-                        case "registercloud": {
-                            Cloud cloud = new Cloud(clientHandler.getAddress(),clientHandler);
+                        case "registercloud" -> {
+                            Cloud cloud = new Cloud(clientHandler.getAddress(), clientHandler);
                             cloudUUID = Minecraft.addCloud(cloud);
-                            clientHandler.write("registercloud "+cloudUUID);
-                            break;
+                            clientHandler.write("registercloud " + cloudUUID);
                         }
-                        case "registerbungee": {
-                            ServerManager.setServerClientHanlder(clientHandler,25565);
-                            break;
+                        case "registerbungee" -> {
+                            ServerManager.setServerClientHanlder(clientHandler, 25565);
                         }
-                        case "registerspigot": {
-                            ServerManager.setServerClientHanlder(clientHandler,Integer.parseInt(args[1]));
-                            break;
+                        case "registerspigot" -> {
+                            ServerManager.setServerClientHanlder(clientHandler, Integer.parseInt(args[1]));
                         }
-                        case "startedserver": {
+                        case "startedserver" -> {
                             ServerManager.servers.get(args[1]).startedServer(Integer.parseInt(args[2]));
-                            break;
                         }
-                        case "setscore": {
+                        case "setscore" -> {
                             Minecraft.clouds.get(cloudUUID).avaibleScore = Integer.parseInt(args[1]);
-                            break;
                         }
                     }
 
