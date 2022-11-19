@@ -1,5 +1,7 @@
 package com.releasenetworks.utils;
 
+import de.gommzy.cloud.cloud.service.Service;
+
 public class SystemProperties {
 
     public static String getUserDirectory() {

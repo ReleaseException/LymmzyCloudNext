@@ -4,18 +4,20 @@ import de.gommzy.cloud.config.Config;
 
 public enum ServerType {
 
-    PAPER("paper", Config.getOptionAsString("cacheLocation") + "/servers/paper", "java -Xms%ihM -Xmx%mhM -Dcom.mojang.eula.agree=true -jar server.jar --nogui --port %p --max-players %mp"),
-    VELOCITY("velocity", Config.getOptionAsString("cacheLocation") + "/servers/velocity", "java -Xms%ihM -Xmx512M -jar server.jar --port %p"),
-    BUNGEECORD("bungeecord", Config.getOptionAsString("cacheLocation") + "/servers/bungeecord", "java -Xms%ihM -Xmx%mhM -jar server.jar");
+    PAPER("paper", Config.getOptionAsString("cacheLocation") + "/servers/paper", "java -Xms%sM -Xmx%sM -Dcom.mojang.eula.agree=true -jar server.jar --nogui --port %S --max-players %s",60000),
+    VELOCITY("velocity", Config.getOptionAsString("cacheLocation") + "/servers/velocity", "java -Xms%sM -Xmx%sM -jar server.jar --port %s",7000),
+    BUNGEECORD("bungeecord", Config.getOptionAsString("cacheLocation") + "/servers/bungeecord", "java -Xms%sM -Xmx%sM -jar server.jar",15000);
 
     private final String type;
     private final String location;
     private final String startCommand;
+    private final long startupTime;
 
-    ServerType(String type, String location, String startCommand) {
+    ServerType(String type, String location, String startCommand, long startupTime) {
         this.type = type;
         this.location = location;
         this.startCommand = startCommand;
+        this.startupTime = startupTime;
     }
 
     public String getType() {
@@ -26,8 +28,12 @@ public enum ServerType {
         return location;
     }
 
-    public String getStartCommand(int port, int maxPlayers, int initialHeap, int maxHeap) {
-        return startCommand.replace("%p", String.valueOf(port)).replace("%mp", String.valueOf(maxPlayers)).replace("%ih", String.valueOf(initialHeap).replace("%mh", String.valueOf(maxHeap)));
+    public long getStartupTime() {
+        return startupTime;
+    }
+
+    public String getStartCommand(int initialHeap, int maxHeap, int port, int maxPlayers) {
+        return String.format(startCommand, initialHeap, maxHeap, port, maxPlayers);
     }
 
 }

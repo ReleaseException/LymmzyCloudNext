@@ -1,12 +1,12 @@
 package de.gommzy.cloud.wrapper.socket;
 
+import com.releasenetworks.bridge.protocol.CloudProtocol;
+import com.releasenetworks.bridge.protocol.ProtocolPacket;
 import de.gommzy.cloud.wrapper.avaible.AvaibleLoop;
 import de.gommzy.cloud.config.Config;
+import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class Client {
@@ -17,8 +17,8 @@ public class Client {
     private Thread avaibleLoop;
     public ClientReciver clientReciver;
     private boolean cooldown = false;
-    private String ip;
-    private int port;
+    private final String ip;
+    private final int port;
 
     public Client(String ip, int port) {
         this.ip = ip;
@@ -41,8 +41,10 @@ public class Client {
             socket = new Socket(ip, port);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
-            write("login "+ Config.getString("cloudpassword"));
-            write("registercloud");
+            writeAsPacket(new ProtocolPacket(CloudProtocol.CLOUD_LOGIN, new JSONObject().put("password", Config.getOptionAsString("cloudpassword"))));
+            //write("login "+ Config.getOptionAsString("cloudpassword"));
+            //write("registercloud");
+            writeAsPacket(new ProtocolPacket(CloudProtocol.REGISTER_CLOUD, new JSONObject().put("registercloud", "null")));
             if (clientReciverThread == null || !clientReciverThread.isAlive()) {
                 final Client thisInstance = this;
                 clientReciverThread = new Thread(() -> new ClientReciver(thisInstance));
@@ -81,6 +83,11 @@ public class Client {
 
     public void write(final String msg) {
         this.writer.println(msg);
+        this.writer.flush();
+    }
+
+    public void writeAsPacket(final ProtocolPacket packet) {
+        this.writer.println(packet.asString());
         this.writer.flush();
     }
 }

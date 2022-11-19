@@ -5,7 +5,17 @@ import java.util.Arrays;
 public enum CloudProtocol {
 
     CHANNEL_REQUEST("request_channel", false, false),
-    BROADCAST("255", false, false);
+    CLOSING_NODE("closing_node", false, true),
+    OPENING_NODE("opening_node", false, true),
+    CLOUD_LOGIN("cloud_login", false, true),
+    REGISTER_CLOUD("register_cloud", false, true),
+    STATS_NODE("stats_node", false, false),
+    TEMPLATE_TRANSFER("template_transfer", false, false),
+    SERVER_START_REQUEST("service_start_request", false, false),
+    SERVER_CLOSE_REQUEST("service_close_request", false, false),
+    SERVER_CLOSED("service_closed", false, false),
+    BROADCAST("255", false, false),
+    B0("0", false, false);
 
     private final String protocol;
     private final boolean subscribable;

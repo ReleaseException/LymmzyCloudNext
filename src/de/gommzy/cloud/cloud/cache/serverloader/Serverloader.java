@@ -6,7 +6,7 @@ import de.gommzy.cloud.config.Config;
 
 import java.io.File;
 
-@LymmzyCloud
+@LymmzyCloud(mode = "master")
 public class Serverloader {
 
     public Serverloader() {

@@ -1,1 +1,0 @@
-package de.gommzy.cloud.cloud.templates;

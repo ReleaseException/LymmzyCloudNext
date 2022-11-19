@@ -52,7 +52,7 @@ public class ClientReciver {
                             String servername = args[1];
                             ServerType serverType = ServerType.valueOf(args[2]);
                             int port = Minecraft.startServer(servername, serverType);
-                            client.write("startedserver " + servername + " " + port);
+                            //client.write("startedserver " + servername + " " + port);
                             break;
                         }
                     }

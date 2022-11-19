@@ -40,8 +40,10 @@ public class FolderUtil {
         }
     }
 
+
+    @Deprecated
     public static void copyFolder(String path, String target, String originalPath) {
-        createFolder(target+"/"+ path.replace(originalPath,""),false);
+        createFolder(target + "/" + path.replace(originalPath,""),false);
 
         File dir = new File(path);
         File[] directoryListing = dir.listFiles();

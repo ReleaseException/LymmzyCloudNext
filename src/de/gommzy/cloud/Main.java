@@ -1,51 +1,58 @@
 package de.gommzy.cloud;
 
-import com.releasenetworks.bridge.socket.Channel;
 import com.releasenetworks.executor.CloudExecutor;
-import de.gommzy.cloud.wrapper.socket.Client;
-import de.gommzy.cloud.cloud.minecraft.Minecraft;
+import de.gommzy.cloud.cloud.cloud.Node;
 import de.gommzy.cloud.cloud.minecraft.Server;
 import de.gommzy.cloud.cloud.socket.SocketServer;
 import de.gommzy.cloud.config.Config;
 import de.gommzy.cloud.files.FolderUtil;
+import de.gommzy.cloud.wrapper.socket.Client;
+import org.reflections.Reflections;
+import org.slf4j.event.Level;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
-
     public static Map<String, Server> servers = new HashMap<>();
+    public static List<String> serviceNames = new ArrayList<>();
+    public static Map<String, Process> services = new ConcurrentHashMap<>();
+    public static List<Node> connectedNodes = Collections.synchronizedList(new ArrayList<>());
+    public static LymmzyCloud.ExecutionType executionType;
 
     public static void main(String[] args) {
+
+        Reflections.log.atLevel(Level.TRACE);
+
         try {
             CloudExecutor.execute();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-        if (Config.getOptionAsBoolean("client")) {
-            FolderUtil.createFolder("temp",true);
-            Client client = new Client(Config.getOptionAsString("cloudhost"), Config.getOptionAsInt("port"));
-            client.login();
-        } else {
-            SocketServer server =  new SocketServer(Config.getOptionAsInt("cloudport"));
-            FolderUtil.createFolder(Config.getOptionAsString("templateLocation"), false);
-            FolderUtil.createFolder(Config.getOptionAsString("cacheLocation"), false);
-            try {
-                File proxy = new File(Config.getOptionAsString("templateLocation") + "/proxy");
-                File fallback = new File(Config.getOptionAsString("templateLocation") + "/fallback");
-                if (!proxy.exists()) {
-                    proxy.mkdirs();
-                }
-                if (!fallback.exists()) {
-                    fallback.mkdirs();
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
+        FolderUtil.createFolder(Config.getOptionAsString("localServiceLocation"), false);
+
+        switch (executionType) {
+            case WRAPPER -> {
+                FolderUtil.createFolder("temp/services", true);
+                FolderUtil.createFolder("temp/templates", false);
+                Client client = new Client(Config.getOptionAsString("cloudhost"), Config.getOptionAsInt("cloudport"));
+                client.login();
             }
-            server.start();
-            new Channel().start();
-            Minecraft.startMinecraft();
+            case CONTROLLER -> {
+                SocketServer server =  new SocketServer(Config.getOptionAsInt("cloudport"));
+                FolderUtil.createFolder(Config.getOptionAsString("templateLocation"), false);
+                FolderUtil.createFolder(Config.getOptionAsString("cacheLocation"), false);
+                server.start();
+                //Minecraft.startMinecraft();
+            }
+            case COMBINED -> {
+                System.out.println("Running combined mode");
+                FolderUtil.createFolder("temp/services",true);
+            }
+            default -> {
+                System.out.println("The configuration does not match any of the cloudpart types: Please check configuration.lymmzycloud ('mode')");
+                System.exit(99);
+            }
         }
     }
 }

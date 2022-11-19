@@ -1,7 +1,9 @@
 package com.releasenetworks.executor;
 
 
+import com.releasenetworks.console.Console;
 import com.releasenetworks.executor.annotations.LymmzyCloud;
+import de.gommzy.cloud.Main;
 import de.gommzy.cloud.config.Config;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -16,11 +18,29 @@ public class CloudExecutor {
 
     public static void execute() throws InstantiationException, IllegalAccessException {
         new Config();
+        new Console().start();
+        Main.executionType = de.gommzy.cloud.LymmzyCloud.ExecutionType.valueOf(Config.getOptionAsString("mode").toUpperCase());
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         for (Class<?> clazz : all()) {
             if (clazz.isAnnotationPresent(LymmzyCloud.class)) {
-                clazz.newInstance();
-                classesPresentedByLymmzyCloud.add(clazz);
+                switch (clazz.getDeclaredAnnotation(LymmzyCloud.class).mode()) {
+                    case "controller" -> {
+                        clazz.newInstance();
+                        classesPresentedByLymmzyCloud.add(clazz);
+                    }
+                    case "wrapper" -> {
+                        clazz.newInstance();
+                        classesPresentedByLymmzyCloud.add(clazz);
+                    }
+                    case "combined" -> {
+                        clazz.newInstance();
+                        classesPresentedByLymmzyCloud.add(clazz);
+                    }
+                    case "all" -> {
+                        clazz.newInstance();
+                        classesPresentedByLymmzyCloud.add(clazz);
+                    }
+                }
             }
         }
     }
@@ -31,5 +51,4 @@ public class CloudExecutor {
         result.addAll(new Reflections("de.gommzy", new SubTypesScanner(false)).getSubTypesOf(Object.class).stream().collect(Collectors.toList()));
         return result;
     }
-
 }

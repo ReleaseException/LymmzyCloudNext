@@ -12,16 +12,13 @@ public class NetworkComponent {
     public static void downloadToPath(String url, File destination) {
         try {
             URL website = new URL(url);
-            ReadableByteChannel rbc;
-            rbc = Channels.newChannel(website.openStream());
-            FileOutputStream fos = new FileOutputStream(destination);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            fos.close();
-            rbc.close();
+            ReadableByteChannel readableByteChannel = Channels.newChannel(website.openStream());
+            FileOutputStream fileOutputStream = new FileOutputStream(destination);
+            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            fileOutputStream.close();
+            readableByteChannel.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
 }

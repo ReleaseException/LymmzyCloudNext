@@ -1,5 +1,7 @@
 package com.releasenetworks.bridge.socket;
 
+import de.gommzy.cloud.LymmzyCloud;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,7 +26,9 @@ public class ChannelHandler {
 
             final ChannelHandler thisInstance = this;
             this.clientReciverThread = new Thread(() -> Channel.set(thisInstance, socket));
+            clientReciverThread.setName("Proxychannel");
             clientReciverThread.start();
+            LymmzyCloud.proxyChannel = thisInstance;
 
             System.out.println("[Connection Bridge] " + address);
         } catch (final IOException exception) {
@@ -32,15 +36,27 @@ public class ChannelHandler {
         }
     }
 
+    @Deprecated(forRemoval = true, since = "0.0.4")
     public void unregister() {
         try {
-            System.out.println("[Unregister] " + address);
+            System.out.println("[Unregister] " + clientReciverThread.getName());
             this.socket.close();
             this.clientReciverThread.interrupt();
             this.clientReciverThread.stop();
 
         } catch (final Exception exc) {
             exc.printStackTrace();
+        }
+    }
+
+    public void closeNode() {
+        try {
+            System.out.println("Closing proxychannel");
+            socket.close();
+            clientReciverThread.interrupt();
+            clientReciverThread.stop();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 

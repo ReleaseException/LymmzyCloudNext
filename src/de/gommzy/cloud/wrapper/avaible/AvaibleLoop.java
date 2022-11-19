@@ -18,13 +18,14 @@ public class AvaibleLoop {
 
 
             if (ram > cpu) {
-                client.write("setscore " + Math.round(ram));
+                //TODO convert to packetprotocol
+                //client.write("setscore " + Math.round(ram));
             } else {
-                client.write("setscore " + Math.round(cpu));
+                //client.write("setscore " + Math.round(cpu));
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(4000);
             } catch (InterruptedException ignored) {}
         }
     }

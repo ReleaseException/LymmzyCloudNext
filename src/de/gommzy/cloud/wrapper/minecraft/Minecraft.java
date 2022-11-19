@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 public class Minecraft {
     public static String cloudUUID;
 
+    @Deprecated(forRemoval = true)
     public static int startServer(String servername, ServerType serverType) {
         try {
             int port = 25565;
