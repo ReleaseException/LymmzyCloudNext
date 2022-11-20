@@ -13,6 +13,8 @@ public class Serverloader {
         this.loadVelocity();
         this.loadBungeecord();
         this.loadPaper();
+        this.loadMinestorm();
+        this.loadOther();
     }
 
     private void loadVelocity() {
@@ -36,6 +38,20 @@ public class Serverloader {
         if (!file.exists()) {
             file.mkdirs();
             NetworkComponent.downloadToPath("https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/504/downloads/waterfall-1.19-504.jar", new File(file.getAbsolutePath() + "/server.jar"));
+        }
+    }
+
+    private void loadMinestorm() {
+        File file = new File(Config.getOptionAsString("cacheLocation") + "/servers/minestorm");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+    }
+
+    private void loadOther() {
+        File file = new File(Config.getOptionAsString("cacheLocation") + "/servers/other");
+        if (!file.exists()) {
+            file.mkdirs();
         }
     }
 }

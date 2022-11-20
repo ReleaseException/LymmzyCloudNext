@@ -6,7 +6,9 @@ public enum ServerType {
 
     PAPER("paper", Config.getOptionAsString("cacheLocation") + "/servers/paper", "java -Xms%sM -Xmx%sM -Dcom.mojang.eula.agree=true -jar server.jar --nogui --port %S --max-players %s",60000),
     VELOCITY("velocity", Config.getOptionAsString("cacheLocation") + "/servers/velocity", "java -Xms%sM -Xmx%sM -jar server.jar --port %s",7000),
-    BUNGEECORD("bungeecord", Config.getOptionAsString("cacheLocation") + "/servers/bungeecord", "java -Xms%sM -Xmx%sM -jar server.jar",15000);
+    MINESTORM("minestorm", Config.getOptionAsString("cacheLocation") + "/servers/minestorm", "java -Xms%sM -Xmx%sM -jar server.jar", 60000),
+    BUNGEECORD("bungeecord", Config.getOptionAsString("cacheLocation") + "/servers/bungeecord", "java -Xms%sM -Xmx%sM -jar server.jar",15000),
+    OTHER("other", Config.getOptionAsString("cacheLocation") + "/servers/other", "java -Xms%sM -Xmx%s -jar server.jar", 15000);
 
     private final String type;
     private final String location;
