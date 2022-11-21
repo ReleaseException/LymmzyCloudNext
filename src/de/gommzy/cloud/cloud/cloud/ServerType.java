@@ -8,7 +8,7 @@ public enum ServerType {
     VELOCITY("velocity", Config.getOptionAsString("cacheLocation") + "/servers/velocity", "java -Xms%sM -Xmx%sM -jar server.jar --port %s",7000),
     MINESTORM("minestorm", Config.getOptionAsString("cacheLocation") + "/servers/minestorm", "java -Xms%sM -Xmx%sM -jar server.jar", 60000),
     BUNGEECORD("bungeecord", Config.getOptionAsString("cacheLocation") + "/servers/bungeecord", "java -Xms%sM -Xmx%sM -jar server.jar",15000),
-    OTHER("other", Config.getOptionAsString("cacheLocation") + "/servers/other", "java -Xms%sM -Xmx%s -jar server.jar", 15000);
+    LymmzySyncProxy("syncproxy", Config.getOptionAsString("cacheLocation") + "/servers/syncproxy", "java -Xms%sM -Xmx%sM -jar server.jar %s", 10000);
 
     private final String type;
     private final String location;
@@ -38,4 +38,7 @@ public enum ServerType {
         return String.format(startCommand, initialHeap, maxHeap, port, maxPlayers);
     }
 
+    public String getSyncProxyStartCommand(int value) {
+        return String.format(startCommand, value);
+    }
 }

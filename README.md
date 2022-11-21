@@ -19,6 +19,10 @@ Dante Raj | Developer LymmzyCloudNext
 (-) Renamed master to controller mode
 
 
+#### 0.0.4.1:
+(+) Minestorm and "other" cachejar directory for template generation \
+
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

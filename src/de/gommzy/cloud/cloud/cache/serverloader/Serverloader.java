@@ -6,7 +6,7 @@ import de.gommzy.cloud.config.Config;
 
 import java.io.File;
 
-@LymmzyCloud(mode = "master")
+@LymmzyCloud(mode = "controller")
 public class Serverloader {
 
     public Serverloader() {
@@ -14,7 +14,7 @@ public class Serverloader {
         this.loadBungeecord();
         this.loadPaper();
         this.loadMinestorm();
-        this.loadOther();
+        this.loadSyncProxy();
     }
 
     private void loadVelocity() {
@@ -48,8 +48,8 @@ public class Serverloader {
         }
     }
 
-    private void loadOther() {
-        File file = new File(Config.getOptionAsString("cacheLocation") + "/servers/other");
+    private void loadSyncProxy() {
+        File file = new File(Config.getOptionAsString("cacheLocation") + "/servers/syncproxy");
         if (!file.exists()) {
             file.mkdirs();
         }
