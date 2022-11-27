@@ -16,43 +16,46 @@ import java.util.Arrays;
 
 public class ServiceExecutor {
 
-    public static void main(String[] args) {
-        new Config();
-        try {
-            createService(new TemplateConfiguration("Proxy", 100, ServerType.VELOCITY, 25565, 256,512, "jdk8", true, 1), null);
-        } catch (LymmzyCloudException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     //TODO: create service command e.g. service create <templatename> <nodename> (ignored if using combined)
 
     public static void createService(TemplateConfiguration configuration, Node node) throws LymmzyCloudException, IOException {
         if (node == null && LymmzyCloud.getExecutionType() == LymmzyCloud.ExecutionType.CONTROLLER) throw new LymmzyCloudException();
-        int serviceIdentifier = LymmzyCloud.services.get(configuration).size() + 1;
+        int serviceIdentifier;
+        if (LymmzyCloud.services.get(configuration) == null) {
+            serviceIdentifier = 1;
+        } else {
+            serviceIdentifier = LymmzyCloud.services.get(configuration).size() + 1;
+        }
         Process process = null;
-        File serviceLocation = new File(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("templateLocation") + "/" + configuration.getTemplateName() + "-" + serviceIdentifier);
+        int port = (int) (configuration.getStartPortRange() - 1 + serviceIdentifier);
+        File serviceLocation;
 
 
         if (configuration.isStaticService()) {
             serviceLocation = new File(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("staticServiceLocation") + "/" + configuration.getTemplateName() + "-" + serviceIdentifier);
-            FolderUtils.copyDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("templateLocation") + "/" + configuration.getTemplateName(), serviceLocation.getPath());
-
+            if (!serviceLocation.exists()) {
+                FolderUtils.copyDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("templateLocation") + "/" + configuration.getTemplateName(), serviceLocation.getPath());
+            }
         } else {
+            serviceLocation = new File(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("tempFolder") + "/" + configuration.getTemplateName() + "-" + serviceIdentifier);
             FolderUtils.copyDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("templateLocation") + "/" + configuration.getTemplateName(), serviceLocation.getPath());
         }
 
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(configuration.getServerType().getStartCommand(configuration.getInitialHeap(), configuration.getMaxRam(), (int) configuration.getStartPortRange(), configuration.getMaxPlayers()).split(" "));
+            ProcessBuilder processBuilder = new ProcessBuilder(configuration.getServerType().getStartCommand(configuration.getInitialHeap(), configuration.getMaxRam(), port, configuration.getMaxPlayers()).split(" "));
             processBuilder.directory(serviceLocation);
             process = processBuilder.start();
-            System.out.println(configuration.getServerType().getStartCommand(configuration.getInitialHeap(), configuration.getMaxRam(), (int) configuration.getStartPortRange(), configuration.getMaxPlayers()));
-            System.out.printf("Service %s has been started%n", configuration.getTemplateName() + "-" + serviceIdentifier);
+            System.out.println(processBuilder.command().toString());
+            System.out.printf("Service %s has been started on port %s%n", configuration.getTemplateName() + "-" + serviceIdentifier, port);
             System.out.println(serviceLocation);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-        new Service(configuration.getTemplateName() + "-" + serviceIdentifier, process, configuration, node).registerService();
+        Service service = new Service(configuration.getTemplateName() + "-" + serviceIdentifier, process, configuration, node);
+        service.registerService();
+        LymmzyCloud.serviceNames.add(service);
+
+        ServiceRegistry.resize();
         //Main.services.put(configuration.getTemplateName() + "-" + serviceIdentifier, process);
     }
 }

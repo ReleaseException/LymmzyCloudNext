@@ -23,24 +23,8 @@ public class CloudExecutor {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         for (Class<?> clazz : all()) {
             if (clazz.isAnnotationPresent(LymmzyCloud.class)) {
-                switch (clazz.getDeclaredAnnotation(LymmzyCloud.class).mode()) {
-                    case "controller" -> {
-                        clazz.newInstance();
-                        classesPresentedByLymmzyCloud.add(clazz);
-                    }
-                    case "wrapper" -> {
-                        clazz.newInstance();
-                        classesPresentedByLymmzyCloud.add(clazz);
-                    }
-                    case "combined" -> {
-                        clazz.newInstance();
-                        classesPresentedByLymmzyCloud.add(clazz);
-                    }
-                    case "all" -> {
-                        clazz.newInstance();
-                        classesPresentedByLymmzyCloud.add(clazz);
-                    }
-                }
+                clazz.newInstance();
+                classesPresentedByLymmzyCloud.add(clazz);
             }
         }
     }

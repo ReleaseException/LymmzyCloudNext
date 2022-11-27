@@ -15,6 +15,14 @@ public enum CloudProtocol {
     SERVER_CLOSE_REQUEST("service_close_request", false, false),
     SERVER_CLOSED("service_closed", false, false),
     BROADCAST("255", false, false),
+    PLAYER_QUIT("player_quit", false, false),
+    PROXY_PING("proxyPing", false, false),
+    PROXY_JOIN("proxyJoin", false, false),
+    PROXY_QUIT("proxyQuit", false, false),
+    PROXY_SWITCH("proxySubSwitch", false, false),
+    PROXY_STATS("proxyStats", false, false),
+    PROXY_LOGIN("bridge_login", false, false),
+    PING("PING", false, false),
     B0("0", false, false);
 
     private final String protocol;
@@ -40,7 +48,7 @@ public enum CloudProtocol {
     }
 
     public static CloudProtocol getProtocol(String protocol) {
-        return Arrays.stream(CloudProtocol.values()).filter(resuls -> protocol.equalsIgnoreCase(resuls.name())).findFirst().orElseThrow(() ->
+        return Arrays.stream(CloudProtocol.values()).filter(resuls -> protocol.equalsIgnoreCase(resuls.protocol)).findFirst().orElseThrow(() ->
             new IllegalArgumentException("No matching protocol found"));
     }
 }

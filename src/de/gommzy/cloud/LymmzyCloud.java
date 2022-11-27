@@ -7,6 +7,8 @@ import de.gommzy.cloud.cloud.minecraft.Server;
 import de.gommzy.cloud.cloud.service.Service;
 import de.gommzy.cloud.cloud.templates.configuration.TemplateConfiguration;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,13 +38,16 @@ public class LymmzyCloud {
         return Main.executionType;
     }
 
-    public static Map<TemplateConfiguration, List<Service>> services;
+    public static Map<TemplateConfiguration, List<Service>> services = new ConcurrentHashMap<>();
+    public static final List<Service> serviceNames = Collections.synchronizedList(new ArrayList<>());
+    public static Map<String, TemplateConfiguration> configurationMap = new ConcurrentHashMap<>();
 
     public static ChannelHandler proxyChannel;
 
     public enum ExecutionType {
         CONTROLLER,
         WRAPPER,
-        COMBINED
+        COMBINED,
+        ALL
     }
 }

@@ -1,5 +1,7 @@
 package com.releasenetworks.bridge.socket;
 
+import com.releasenetworks.bridge.protocol.ProtocolPacket;
+import com.releasenetworks.logger.Logger;
 import de.gommzy.cloud.LymmzyCloud;
 
 import java.io.BufferedReader;
@@ -30,7 +32,7 @@ public class ChannelHandler {
             clientReciverThread.start();
             LymmzyCloud.proxyChannel = thisInstance;
 
-            System.out.println("[Connection Bridge] " + address);
+            Logger.log("Socket %s is trying to connect as proxychannel", Logger.Level.INFO, address);
         } catch (final IOException exception) {
             exception.printStackTrace();
         }
@@ -51,7 +53,7 @@ public class ChannelHandler {
 
     public void closeNode() {
         try {
-            System.out.println("Closing proxychannel");
+            Logger.log("Closing proxychannel", Logger.Level.INFO);
             socket.close();
             clientReciverThread.interrupt();
             clientReciverThread.stop();
@@ -71,6 +73,11 @@ public class ChannelHandler {
 
     public void write(final String msg) {
         this.writer.println(msg);
+        this.writer.flush();
+    }
+
+    public void writeAsPacket(final ProtocolPacket packet) {
+        this.writer.println(packet.asString());
         this.writer.flush();
     }
 

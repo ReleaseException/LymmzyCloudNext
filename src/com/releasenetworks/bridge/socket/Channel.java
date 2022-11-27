@@ -1,16 +1,26 @@
 package com.releasenetworks.bridge.socket;
 
+import com.releasenetworks.bridge.protocol.CloudProtocol;
+import com.releasenetworks.bridge.protocol.ProtocolPacket;
 import com.releasenetworks.executor.annotations.LymmzyCloud;
+import com.releasenetworks.logger.Logger;
 import de.gommzy.cloud.Main;
 import de.gommzy.cloud.config.Config;
 import org.json.JSONObject;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
-@LymmzyCloud(mode = "all")
+@LymmzyCloud
 public class Channel {
+
+    public static ChannelHandler channelHandler = null;
+    public static Map<String, List<ProtocolPacket>> pendingRequests = new ConcurrentHashMap<>();
 
     public Channel() {
         this.start();
@@ -21,15 +31,17 @@ public class Channel {
             try {
                 ServerSocket serverSocket = new ServerSocket(Config.getOptionAsInt("httpport"));
                 Thread thread = new Thread(() -> {
-                    try {
+                    while (!serverSocket.isClosed()) {
                         try {
-                            System.out.println("Waiting for Proxy to connect");
-                            new ChannelHandler(serverSocket.accept());
+                            try {
+                                System.out.println("Waiting for Proxy to connect");
+                                channelHandler = new ChannelHandler(serverSocket.accept());
+                            } catch (Exception exc) {
+                                exc.printStackTrace();
+                            }
                         } catch (Exception exc) {
                             exc.printStackTrace();
                         }
-                    } catch (Exception exc) {
-                        exc.printStackTrace();
                     }
                 });
                 thread.start();
@@ -41,39 +53,62 @@ public class Channel {
 
     public static void set(ChannelHandler clientHandler, Socket socket) {
         try {
-            while(socket.isConnected()) {
-                JSONObject recivedPacket = new JSONObject(clientHandler.read());
-                if (recivedPacket.toString() == null) {
-                    break;
-                }
-                Thread theread = new Thread(() -> {
-                    String protocol = recivedPacket.getString("packet");
-                    String authentication = recivedPacket.getString("authkey");
-                    switch (protocol) {
-                        case "PING" -> {
-                            clientHandler.write("PONG");
-                        }
-                        case "login" -> {
-                            final String pswd = authentication;
-                            System.out.println(Config.getOptionAsString("proxypassword").equals(pswd));
-                            if (!pswd.equals(Config.getOptionAsString("proxypassword"))) {
-                                System.out.println("[Wrong-Pswd] " + clientHandler.getAddress());
-                                clientHandler.unregister();
-                            } else {
-                                System.out.println("[Register] " + clientHandler.getAddress());
-                            }
-                        }
+            //new Thread(() -> {
+                while(socket.isConnected()) {
+                    JSONObject recivedPacket = new JSONObject(clientHandler.read());
+                    if (recivedPacket.toString() == null) {
+                        break;
                     }
 
-                });
-                theread.setName("Bridge - Listenerthread :: " + theread.getId());
-                System.out.println(theread.getName());
-                theread.start();
-            }
-            clientHandler.unregister();
+                    switch (CloudProtocol.getProtocol(recivedPacket.getString("packet"))) {
+                        case PING -> {
+                            clientHandler.write("PONG");
+                        }
+                        case PROXY_LOGIN -> {
+                            final String pswd = recivedPacket.getString("authkey");
+                            //System.out.println(Config.getOptionAsString("proxypassword").equals(pswd));
+                            if (!pswd.equals(Config.getOptionAsString("proxypassword"))) {
+                                System.out.println("[Wrong-Pswd] " + clientHandler.getAddress());
+                                clientHandler.closeNode();
+                            } else {
+                                Logger.log("Bridgechannel %s has been registered", Logger.Level.INFO, clientHandler.getAddress());
+                                for (ProtocolPacket pendingPacket : Channel.pendingRequests.get("dummy")) {
+                                    Thread.sleep(1000);
+                                    channelHandler.writeAsPacket(pendingPacket);
+                                    //Channel.pendingRequests.get("dummy").remove(pendingPacket);
+                                }
+                            }
+                        }
+                        case PROXY_STATS -> {
+                            //System.out.println(recivedPacket.toString());
+                        }
+                        case PROXY_PING -> {
+                            //Nothing because console spam p:
+                        }
+                        case PROXY_JOIN -> {
+                            String UUID = recivedPacket.getString("uuid");
+                            String name = recivedPacket.getString("name");
+                            Logger.log("%s (%s) connected to the network", Logger.Level.INFO, name, UUID);
+                        }
+                        case PROXY_SWITCH -> {
+                            String UUID = recivedPacket.getString("uuid");
+                            String name = recivedPacket.getString("name");
+                            String previousServer = recivedPacket.getString("previousServer");
+                            String newServer = recivedPacket.getString("currentServer");
+                            Logger.log("%s (%s) switched from %s to %s", Logger.Level.INFO, name, UUID, previousServer, newServer);
+                        }
+                        case PROXY_QUIT -> {
+                            String UUID = recivedPacket.getString("uuid");
+                            String name = recivedPacket.getString("name");
+                            Logger.log("%s (%s) disconnected to the network", Logger.Level.INFO, name, UUID);
+                        }
+                    }
+                }
+            //}).start();
+            clientHandler.closeNode();
         } catch (final Exception exc) {
             exc.printStackTrace();
-            clientHandler.unregister();
+            clientHandler.closeNode();
         }
     }
 }

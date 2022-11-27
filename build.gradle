@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'de.gommzy'
-version = '0.0.4.1'
+version = '0.0.4.2'
 sourceCompatibility = '17'
 
 repositories {
@@ -15,7 +15,7 @@ dependencies {
 	implementation 'org.json:json:20220924'
 	implementation 'org.reflections:reflections:0.10.2'
 	implementation 'org.slf4j:slf4j-simple:2.0.3'
-	implementation 'mysql:mysql-connector-java:8.0.30'
+	implementation 'com.mysql:mysql-connector-j:8.0.31'
 	implementation 'com.zaxxer:HikariCP:5.0.1'
 }
 
@@ -25,4 +25,8 @@ sourceSets {
 			srcDirs 'src'
 		}
 	}
+}
+
+tasks.jar {
+	manifest.attributes["Main-Class"] = "de.gommzy.cloud.Main"
 }

@@ -1,18 +1,23 @@
 package com.releasenetworks.console.sub;
 
+import com.mysql.cj.log.Log;
 import com.releasenetworks.console.Command;
+import com.releasenetworks.executor.exceptions.LymmzyCloudException;
+import com.releasenetworks.logger.Logger;
 import de.gommzy.cloud.cloud.cloud.ServerType;
+import de.gommzy.cloud.cloud.service.ServiceRegistry;
 import de.gommzy.cloud.cloud.templates.TemplateExecutor;
 import de.gommzy.cloud.config.Config;
 
 import java.io.File;
+import java.io.IOException;
 
 @com.releasenetworks.executor.annotations.Command(command = "template")
 public class TemplateCommand extends Command {
 
     private final String[] args;
 
-    public TemplateCommand(String[] args) {
+    public TemplateCommand(String[] args) throws LymmzyCloudException, IOException, InterruptedException {
         super("template", args, "The built-in template command!");
         this.args = args;
         if (args.length > 1) {
@@ -26,17 +31,24 @@ public class TemplateCommand extends Command {
                 case "list" -> {
                     list();
                 }
+                case "reload" -> {
+
+                }
+                case "resize" -> {
+                    ServiceRegistry.resize();
+                    Logger.log("Resize complete", Logger.Level.DEBUG);
+                }
                 default -> {
-                    System.out.println("Please use template create/remove/list");
+                    Logger.log("Please use template create/remove/list", Logger.Level.INFO);
                 }
             }
         } else {
-            System.out.println("Please use template create/remove/list");
+            Logger.log("Please use template create/remove/list", Logger.Level.INFO);
         }
     }
 
-    private void generate() {
-        if (args.length == 11) {
+    private void generate() throws LymmzyCloudException, IOException, InterruptedException {
+        if (args.length == 12) {
             String name = args[2];
             int players = Integer.parseInt(args[3]);
             ServerType type = ServerType.valueOf(args[4]);
@@ -46,6 +58,7 @@ public class TemplateCommand extends Command {
             String targetVMVersion = args[8];
             boolean staticService = Boolean.parseBoolean(args[9]);
             int minServiceCount = Integer.parseInt(args[10]);
+            boolean fallbackHost = Boolean.parseBoolean(args[11]);
 
             TemplateExecutor.createTemplate(
                     name,
@@ -56,12 +69,13 @@ public class TemplateCommand extends Command {
                     maxRam,
                     targetVMVersion,
                     staticService,
-                    minServiceCount
+                    minServiceCount,
+                    fallbackHost
             );
 
 
         } else {
-            System.out.println("Please use: template create <name> <maxPlayers> <BUNGEECORD/VELOCITY/PAPER> <startPortrange> <initialHeap> <maxHeap> <targetVMVersion> <staticservice> <minserviceCount>");
+            Logger.log("Please use: template create <name> <maxPlayers> <BUNGEECORD/VELOCITY/PAPER> <startPortrange> <initialHeap> <maxHeap> <targetVMVersion> <staticservice> <minserviceCount> <fallbackhost boolean>", Logger.Level.INFO);
         }
     }
 
@@ -69,7 +83,7 @@ public class TemplateCommand extends Command {
         if (args.length == 3) {
             TemplateExecutor.deleteTemplate(args[2]);
         } else {
-            System.out.println("Please use: template remove <name>");
+            Logger.log("Please use: template remove <name>", Logger.Level.INFO);
         }
     }
 
@@ -79,9 +93,9 @@ public class TemplateCommand extends Command {
             if (templateNames.length == 0) {
                 System.out.println("You have not created any templates yet!");
             } else {
-                System.out.printf("There are %s templates existing!%n", templateNames.length);
+                Logger.log("There are %s templates existing!", Logger.Level.INFO, templateNames.length);
                 for (int i = 0; i < templateNames.length; i++) {
-                    System.out.printf("%s. %s%n", i + 1, templateNames[i].getAbsoluteFile().getName());
+                    Logger.log("%s. %s", Logger.Level.INFO, i + 1, templateNames[i].getAbsoluteFile().getName());
                 }
             }
         }

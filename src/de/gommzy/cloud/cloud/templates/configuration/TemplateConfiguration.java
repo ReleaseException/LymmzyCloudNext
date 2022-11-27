@@ -7,7 +7,7 @@ public class TemplateConfiguration {
 
     private final JSONObject jsonObject;
 
-    public TemplateConfiguration(String templateName, int maxPlayers, ServerType serverType, long starPortRange, int maxRam, int initialHeap, String targetVmVersion, boolean staticService, int minServiceCount) {
+    public TemplateConfiguration(String templateName, int maxPlayers, ServerType serverType, long starPortRange, int maxRam, int initialHeap, String targetVmVersion, boolean staticService, int minServiceCount, boolean fallback) {
         jsonObject = new JSONObject();
         jsonObject.put("templateName", templateName);
         jsonObject.put("maxPlayers", maxPlayers);
@@ -18,6 +18,7 @@ public class TemplateConfiguration {
         jsonObject.put("initialHeap", initialHeap);
         jsonObject.put("staticService", staticService);
         jsonObject.put("minServiceCount", minServiceCount);
+        jsonObject.put("fallbackHost", fallback);
     }
 
     public String getTemplateName() {
@@ -54,6 +55,10 @@ public class TemplateConfiguration {
 
     public int getMinServiceCount() {
         return jsonObject.getInt("minServiceCount");
+    }
+
+    public boolean isFallbackHost() {
+        return jsonObject.getBoolean("fallbackHost");
     }
 
     public JSONObject getJsonObject() {
