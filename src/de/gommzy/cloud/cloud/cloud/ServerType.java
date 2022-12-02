@@ -6,7 +6,7 @@ public enum ServerType {
 
     PAPER("paper", Config.getOptionAsString("cacheLocation") + "/servers/paper", "java -Xms%sM -Xmx%sM -Dcom.mojang.eula.agree=true -jar server.jar --nogui --port %S --max-players %s",60000),
     VELOCITY("velocity", Config.getOptionAsString("cacheLocation") + "/servers/velocity", "java -Xms%sM -Xmx%sM -jar server.jar --port %s",7000),
-    MINESTORM("minestorm", Config.getOptionAsString("cacheLocation") + "/servers/minestorm", "java -Xms%sM -Xmx%sM -Dcom.mojang.eula.agree=true -jar server.jar --nogui", 60000),
+    MINESTORM("minestorm", Config.getOptionAsString("cacheLocation") + "/servers/minestorm", "java -Xms%sM -Xmx%sM -Dcom.mojang.eula.agree=true -jar server.jar --nogui --port %s --max-players %s", 60000),
     BUNGEECORD("bungeecord", Config.getOptionAsString("cacheLocation") + "/servers/bungeecord", "java -Xms%sM -Xmx%sM -jar server.jar",15000),
     LymmzyActiveSyncproxy("syncproxy", Config.getOptionAsString("cacheLocation") + "/servers/syncproxy", "java -Xms%sM -Xmx%sM -jar server.jar %s", 5000);
 
