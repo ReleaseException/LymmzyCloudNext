@@ -53,9 +53,10 @@ public class Channel {
 
     public static void set(ChannelHandler clientHandler, Socket socket) {
         try {
-            //new Thread(() -> {
                 while(socket.isConnected()) {
-                    JSONObject recivedPacket = new JSONObject(clientHandler.read());
+                    String read = clientHandler.read();
+                    if (!read.split("")[0].equals("{")) return;
+                    JSONObject recivedPacket = new JSONObject(read);
                     if (recivedPacket.toString() == null) {
                         break;
                     }
@@ -66,7 +67,6 @@ public class Channel {
                         }
                         case PROXY_LOGIN -> {
                             final String pswd = recivedPacket.getString("authkey");
-                            //System.out.println(Config.getOptionAsString("proxypassword").equals(pswd));
                             if (!pswd.equals(Config.getOptionAsString("proxypassword"))) {
                                 System.out.println("[Wrong-Pswd] " + clientHandler.getAddress());
                                 clientHandler.closeNode();
@@ -104,7 +104,6 @@ public class Channel {
                         }
                     }
                 }
-            //}).start();
             clientHandler.closeNode();
         } catch (final Exception exc) {
             exc.printStackTrace();
