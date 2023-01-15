@@ -15,7 +15,7 @@ public class ServiceUtils {
             List<Service> serviceList = LymmzyCloud.services.get(configuration);
             for (Service service : serviceList) {
                 if (service.getServiceName().equals(name)) {
-                    service.closeService();
+                    service.closeService(false);
                     Logger.log("Closing %s", Logger.Level.INFO, service.getServiceName());
                     break;
                 }

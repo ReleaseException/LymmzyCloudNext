@@ -5,6 +5,9 @@ import com.releasenetworks.bridge.protocol.ProtocolPacket;
 import com.releasenetworks.executor.annotations.LymmzyCloud;
 import com.releasenetworks.logger.Logger;
 import de.gommzy.cloud.Main;
+import de.gommzy.cloud.cloud.service.ServiceExecutor;
+import de.gommzy.cloud.cloud.service.ServiceRegistry;
+import de.gommzy.cloud.cloud.templates.configuration.TemplateConfiguration;
 import de.gommzy.cloud.config.Config;
 import org.json.JSONObject;
 
@@ -101,6 +104,13 @@ public class Channel {
                             String UUID = recivedPacket.getString("uuid");
                             String name = recivedPacket.getString("name");
                             Logger.log("%s (%s) disconnected to the network", Logger.Level.INFO, name, UUID);
+                        }
+                        case SERVER_START_REQUEST -> {
+                            if (recivedPacket.getString("template") == null) {
+                                TemplateConfiguration configuration = de.gommzy.cloud.LymmzyCloud.configurationMap.get(recivedPacket.getString("template"));
+                                ServiceExecutor.createService(configuration, null);
+                            }
+
                         }
                     }
                 }

@@ -50,6 +50,7 @@ public class ServiceRegistry {
     }
 
     public static void resize() throws IOException, LymmzyCloudException {
+        new ServiceRegistry().register();
         File[] templateNames = new File(Config.getOptionAsString("templateLocation")).listFiles();
         if (TemplateUtils.getTemplateByName(Config.getOptionAsArray("startOrder").get(0).toString()) != null) {
             TemplateConfiguration configuration = TemplateUtils.getTemplateByName(Config.getOptionAsArray("startOrder").get(0).toString());

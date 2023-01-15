@@ -22,8 +22,7 @@ public class ShutdownHook extends Thread {
             for (TemplateConfiguration configuration : LymmzyCloud.services.keySet()) {
                 for (Service server : LymmzyCloud.services.get(configuration)) {
                     if (server.getProcess() != null) {
-                        server.closeService();
-                        Logger.log("%s has been closed!", Logger.Level.INFO, server.getServiceName());
+                        server.closeService(true);
                     }
                 }
             }
