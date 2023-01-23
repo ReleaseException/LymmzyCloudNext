@@ -25,7 +25,8 @@ public enum CloudProtocol {
     PROXY_LOGIN("bridge_login", false, false),
     PING("PING", false, false),
     SERVER_STARTED("server_started", false, false),
-    B0("0", false, false);
+    B0("0", false, false),
+    B1("127", false, false);
 
     private final String protocol;
     private final boolean subscribable;
