@@ -18,7 +18,52 @@ public class ServiceExecutor {
 
     //TODO: create service command e.g. service create <templatename> <nodename> (ignored if using combined)
 
-    public static void createService(TemplateConfiguration configuration, Node node) throws LymmzyCloudException, IOException {
+    public static Service createService(TemplateConfiguration configuration, Node node) throws LymmzyCloudException, IOException {
+        if (node == null && LymmzyCloud.getExecutionType() == LymmzyCloud.ExecutionType.CONTROLLER) throw new LymmzyCloudException();
+        int serviceIdentifier;
+        if (LymmzyCloud.services.get(configuration) == null) {
+            serviceIdentifier = 1;
+        } else {
+            serviceIdentifier = LymmzyCloud.services.get(configuration).size() + 1;
+        }
+        Process process = null;
+        int port = (int) (configuration.getStartPortRange() - 1 + serviceIdentifier);
+        while (ServiceUtils.isPortUsed(port)) {
+            port++;
+        }
+        File serviceLocation;
+
+
+        if (configuration.isStaticService()) {
+            serviceLocation = new File(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("staticServiceLocation") + "/" + configuration.getTemplateName() + "-" + serviceIdentifier);
+            if (!serviceLocation.exists()) {
+                FolderUtils.copyDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("templateLocation") + "/" + configuration.getTemplateName(), serviceLocation.getPath());
+            }
+        } else {
+            serviceLocation = new File(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("tempFolder") + "/" + configuration.getTemplateName() + "-" + serviceIdentifier);
+            FolderUtils.copyDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("templateLocation") + "/" + configuration.getTemplateName(), serviceLocation.getPath());
+        }
+
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(configuration.getServerType().getStartCommand(configuration.getInitialHeap(), configuration.getMaxRam(), port, configuration.getMaxPlayers()).split(" "));
+            processBuilder.directory(serviceLocation);
+            process = processBuilder.start();
+            System.out.println(processBuilder.command().toString());
+            System.out.printf("Service %s has been started on port %s%n", configuration.getTemplateName() + "-" + serviceIdentifier, port);
+            System.out.println(serviceLocation);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        Service service = new Service(configuration.getTemplateName() + "-" + serviceIdentifier, process, configuration, node);
+        service.registerService();
+        LymmzyCloud.serviceNames.add(service);
+
+        ServiceRegistry.resize();
+        //Main.services.put(configuration.getTemplateName() + "-" + serviceIdentifier, process);
+        return service;
+    }
+
+    public static Service createDynamicService(TemplateConfiguration configuration, Node node) throws LymmzyCloudException, IOException {
         if (node == null && LymmzyCloud.getExecutionType() == LymmzyCloud.ExecutionType.CONTROLLER) throw new LymmzyCloudException();
         int serviceIdentifier;
         if (LymmzyCloud.services.get(configuration) == null) {
@@ -57,5 +102,6 @@ public class ServiceExecutor {
 
         ServiceRegistry.resize();
         //Main.services.put(configuration.getTemplateName() + "-" + serviceIdentifier, process);
+        return service;
     }
 }

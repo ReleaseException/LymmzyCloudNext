@@ -5,8 +5,11 @@ import com.releasenetworks.bridge.protocol.ProtocolPacket;
 import com.releasenetworks.executor.annotations.LymmzyCloud;
 import com.releasenetworks.logger.Logger;
 import de.gommzy.cloud.Main;
+import de.gommzy.cloud.cloud.service.Service;
 import de.gommzy.cloud.cloud.service.ServiceExecutor;
 import de.gommzy.cloud.cloud.service.ServiceRegistry;
+import de.gommzy.cloud.cloud.service.ServiceUtils;
+import de.gommzy.cloud.cloud.templates.TemplateUtils;
 import de.gommzy.cloud.cloud.templates.configuration.TemplateConfiguration;
 import de.gommzy.cloud.config.Config;
 import org.json.JSONObject;
@@ -78,7 +81,6 @@ public class Channel {
                                 for (ProtocolPacket pendingPacket : Channel.pendingRequests.get("dummy")) {
                                     Thread.sleep(1000);
                                     channelHandler.writeAsPacket(pendingPacket);
-                                    //Channel.pendingRequests.get("dummy").remove(pendingPacket);
                                 }
                             }
                         }
@@ -106,11 +108,18 @@ public class Channel {
                             Logger.log("%s (%s) disconnected to the network", Logger.Level.INFO, name, UUID);
                         }
                         case SERVER_START_REQUEST -> {
-                            if (recivedPacket.getString("template") == null) {
-                                TemplateConfiguration configuration = de.gommzy.cloud.LymmzyCloud.configurationMap.get(recivedPacket.getString("template"));
-                                ServiceExecutor.createService(configuration, null);
+                            if (recivedPacket.has("template")) {
+                                int ack = recivedPacket.getInt("ack");
+                                TemplateConfiguration configuration = TemplateUtils.getTemplateByName(recivedPacket.getString("template"));
+                                Service service = ServiceExecutor.createService(configuration, null);
+                                de.gommzy.cloud.LymmzyCloud.proxyChannel.writeAsPacket(new ProtocolPacket(CloudProtocol.SERVER_STARTED, new JSONObject().put("serviceName", service.getServiceName()).put("ack", ack).put("UUID", recivedPacket.get("UUID"))));
+                                Logger.log("Remote start of %s", Logger.Level.INFO, service.getServiceName());
                             }
-
+                        }
+                        case SERVER_CLOSE_REQUEST -> {
+                            if (recivedPacket.has("service")) {
+                                ServiceUtils.closeService(recivedPacket.getString("service"));
+                            }
                         }
                     }
                 }

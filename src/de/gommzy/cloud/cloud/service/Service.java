@@ -28,7 +28,6 @@ public class Service {
     private final Node node;
 
     public Service(String serviceName, Process process, TemplateConfiguration configuration, Node node) {
-        //TODO params servicename e.g. Lobby-1, process, TemplateConfiguration, Node
         this.serviceName = serviceName;
         this.process = process;
         this.configuration = configuration;
@@ -65,29 +64,43 @@ public class Service {
         }
     }
 
-    public synchronized void closeService(boolean shutdown) throws IOException, LymmzyCloudException, InterruptedException {
-        LymmzyCloud.services.get(configuration).remove(this);
-        PrintWriter writer = new PrintWriter(this.getProcess().getOutputStream());
-        writer.println("stop");
-        writer.flush();
-        Thread.sleep(5000);
-        this.getProcess().destroy();
-        if (Channel.channelHandler != null) {
-            Channel.channelHandler.writeAsPacket(new ProtocolPacket(CloudProtocol.SERVER_CLOSE_REQUEST, new JSONObject()
-                    .put("address", "127.0.0.1")
-                    .put("port", (int) configuration.getStartPortRange() + Integer.parseInt(serviceName.split("-")[1]) - 1)
-                    .put("serviceName", serviceName)));
-        }
-        try {
-            if (!this.configuration.isStaticService()) {
-                Thread.sleep(8000);
-                FolderUtils.deleteDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("tempFolder") + "/" + serviceName);
+    public synchronized void closeService(boolean shutdown) {
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                PrintWriter writer = new PrintWriter(this.getProcess().getOutputStream());
+                writer.println("stop");
+                writer.flush();
+                Thread.sleep(5000);
+                this.getProcess().destroy();
+                if (Channel.channelHandler != null) {
+                    Channel.channelHandler.writeAsPacket(new ProtocolPacket(CloudProtocol.SERVER_CLOSE_REQUEST, new JSONObject()
+                            .put("address", "127.0.0.1")
+                            .put("port", (int) configuration.getStartPortRange() + Integer.parseInt(serviceName.split("-")[1]) - 1)
+                            .put("serviceName", serviceName)));
+                }
+                try {
+                    if (!this.configuration.isStaticService()) {
+                        Thread.sleep(8000);
+                        FolderUtils.deleteDirectory(SystemProperties.getUserDirectory() + "/" + Config.getOptionAsString("tempFolder") + "/" + serviceName);
+                    }
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        if (!shutdown) ServiceRegistry.resize();
+            return this;
+        }).thenAccept(rs -> {
+            LymmzyCloud.services.get(configuration).remove(rs);
+            if (!shutdown) {
+                try {
+                    ServiceRegistry.resize();
+                } catch (IOException | LymmzyCloudException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     @Override

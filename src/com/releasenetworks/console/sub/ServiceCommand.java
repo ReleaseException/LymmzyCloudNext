@@ -5,7 +5,9 @@ import com.releasenetworks.executor.exceptions.LymmzyCloudException;
 import com.releasenetworks.logger.Logger;
 import de.gommzy.cloud.LymmzyCloud;
 import de.gommzy.cloud.cloud.service.Service;
+import de.gommzy.cloud.cloud.service.ServiceExecutor;
 import de.gommzy.cloud.cloud.service.ServiceUtils;
+import de.gommzy.cloud.cloud.templates.TemplateUtils;
 import de.gommzy.cloud.cloud.templates.configuration.TemplateConfiguration;
 
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class ServiceCommand extends Command {
                     }
                 }
             }
-            case "kill", "destroy", "close" -> {
+            case "kill", "destroy", "close", "stop" -> {
                 if (args.length == 3) {
                     ServiceUtils.closeService(args[2]);
                 } else {
@@ -37,6 +39,9 @@ public class ServiceCommand extends Command {
                 } else {
                     Logger.log("Please use: service remove <servicename>", Logger.Level.INFO);
                 }
+            }
+            case "create" -> {
+                ServiceExecutor.createService(TemplateUtils.getTemplateByName(args[2]), null);
             }
         }
     }
